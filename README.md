@@ -36,3 +36,10 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
   - Scatter plots with the correlation coefficients (single dataframe or multiple dataframes)
   
 ## Analysis Jupyter Notebooks
+GRO&PROComparison
+- Compares mT values between GRO & PRO mcf7 samples
+Term_Gene_comparison_10_9 & LIET_model_plotting-TPM
+- Comparing termination across celltypes (within & between experiments)
+- This actually uses the padded data lol
+SharedvsSepPriors10.8
+Ru's Genes Analysis
