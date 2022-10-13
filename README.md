@@ -35,11 +35,21 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
   - Bar & boxplot graphs (use df merger before)
   - Scatter plots with the correlation coefficients (single dataframe or multiple dataframes)
   
-## Analysis Jupyter Notebooks
+## Analysis Jupyter Notebooks (I chose the actually useful ones lol)
 GRO&PROComparison
 - Compares mT values between GRO & PRO mcf7 samples
+
 Term_Gene_comparison_10_9 & LIET_model_plotting-TPM
 - Comparing termination across celltypes (within & between experiments)
 - This actually uses the padded data lol
+
 SharedvsSepPriors10.8
+- comparing mT & sigmaT
+- calculating strand bias
+- exploratory daata analysis of individual runs
+- actual analysis comparing posteriors in both runs
+
 Ru's Genes Analysis
+- seeing how Ru's genes compare to our hermit list and my manually curated list
+
+HeatShock
