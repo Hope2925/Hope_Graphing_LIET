@@ -1,6 +1,7 @@
 # Hope_Graphing_LIET
 This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIET output.
-*Note on Vocabulary:*
+
+**Note on Vocabulary:**
 - Runs/Samples: e.g. SRR86293022
 - Papers/Experiments: e.g. Core2014Analysis
 ## Summary Notes
