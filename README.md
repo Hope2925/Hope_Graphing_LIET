@@ -35,6 +35,11 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
   - Bar & boxplot graphs (use df merger before)
   - Scatter plots with the correlation coefficients (single dataframe or multiple dataframes)
   
+- trashfunctions.py
+  - functions or code that are no longer used but in case you wanted it
+  - plotting multiple bar plots in one plot
+  - calculating weighted average based on stdev AND probability of parameter based on prior distribution
+  
 ## Analysis Jupyter Notebooks (I chose the actually useful ones lol)
 GRO&PROComparison
 - Compares mT values between GRO & PRO mcf7 samples
@@ -53,3 +58,13 @@ Ru's Genes Analysis
 - seeing how Ru's genes compare to our hermit list and my manually curated list
 
 HeatShock
+
+Iter_Plotting
+- comparing with 10, 30, and 50 thousand iterations
+- I also compare w/ and w/o tI_a and sL_a (NOT without mL_a so don't use as actual comparison for shared vs separate priors)
+
+RNA_recycling
+- EARLY assessment so excuse the older, less efficient functions
+- calculating background coverage for antisense and sense
+- seeing if termination peaks correlate with antisense initiation peaks
+- Summary: no correlation observed, but seeing if the same RNA pol might be used again to retranscribe the same gene and/or might be transcribing the antisense portion
