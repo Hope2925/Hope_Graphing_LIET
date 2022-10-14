@@ -51,6 +51,9 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
 - exploratory daata analysis of individual runs
 - actual analysis comparing posteriors in both runs
 
+**TPMAnalysis2.0**
+- seeing coverage, mT_stdev, and mT_mean comparison between subsamples of a bam file
+
 **Ru's Genes Analysis**
 - seeing how Ru's genes compare to our hermit list and my manually curated list
 
