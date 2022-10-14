@@ -41,34 +41,42 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
   - calculating weighted average based on stdev AND probability of parameter based on prior distribution
   
 ## Analysis Jupyter Notebooks (I chose the actually useful ones lol)
-GRO&PROComparison
-- Compares mT values between GRO & PRO mcf7 samples
 
-Term_Gene_comparison_10_9 & LIET_model_plotting-TPM
-- Comparing termination across celltypes (within & between experiments)
-- This actually uses the padded data lol
+### Important Baseline Analysis
 
-SharedvsSepPriors10.8
+**SharedvsSepPriors10.8**
 - comparing mT & sigmaT
 - calculating strand bias
 - exploratory daata analysis of individual runs
 - actual analysis comparing posteriors in both runs
 
-Ru's Genes Analysis
+**Ru's Genes Analysis**
 - seeing how Ru's genes compare to our hermit list and my manually curated list
 
-HeatShock1.0
-- comparing heatshock results for Vih 2017 
-- This is the one where the heatshock bedgraphs didn't actually look like heatshock graphs.
-
-HeatShock2.0
-- comparing heatshock results for Joe's data for Eric
-
-Iter_Plotting
+**Iter_Plotting**
 - comparing with 10, 30, and 50 thousand iterations
 - I also compare w/ and w/o tI_a and sL_a (NOT without mL_a so don't use as actual comparison for shared vs separate priors)
 
-RNA_recycling
+### Comparing Termination
+
+**GRO&PROComparison**
+- Compares mT values between GRO & PRO mcf7 samples
+
+**Term_Gene_comparison_10_9 & LIET_model_plotting-TPM**
+- Comparing termination across celltypes (within & between experiments)
+- This actually uses the padded data lol
+
+**HeatShock1.0**
+- comparing heatshock results for Vih 2017 
+- This is the one where the heatshock bedgraphs didn't actually look like heatshock graphs.
+- Therefore, there is a lot of frantic exploratory data analysis to assess what is happening before I looked at the bedgraphs.
+
+**HeatShock2.0**
+- comparing heatshock results for Joe's data for Eric
+
+### Random Other
+
+**RNA_recycling**
 - EARLY assessment so excuse the older, less efficient functions
 - calculating background coverage for antisense and sense
 - seeing if termination peaks correlate with antisense initiation peaks
