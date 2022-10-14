@@ -53,6 +53,7 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
 
 **TPMAnalysis2.0**
 - seeing coverage, mT_stdev, and mT_mean comparison between subsamples of a bam file
+- **LIET_model_plotting-TPM.ipynb** plots genes of interest from this analysis
 
 **Ru's Genes Analysis**
 - seeing how Ru's genes compare to our hermit list and my manually curated list
