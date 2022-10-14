@@ -22,6 +22,9 @@ This repo is dependent on Jacob's LIET repo and is used to graph and analyze LIE
 2. All of my graphing uses dataframes since it allows easy merging of different datasets for comparison. This is mediated by the functions in analysis.py. The two of greatest note would be the df_merger which would return the dataframes to ensure the new indexes only include genes shared between the two runs. df_combiner takes dataframes of different samples and gets the columns of interest and adds them to a single dataframe labeled appropriately for comparsion. It uses the merger function to ensure only genes shared by all samples are included.
 3. I tried to make the functions modular but if I want to change a tiny nuance in a function, I'll usually just copy and paste a function into the jupyter notebook and use that function rather than the imported one.
 
+## Tests
+- I didn't get very far at all on the unit tests due to the unexpected problems with data analysis :(. But I got some done and was able
+to also make a couple sample files that will be helpful for making more tests. 
 
 ## Shared Functions
 - analysis_funcs.py
