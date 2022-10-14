@@ -57,7 +57,12 @@ SharedvsSepPriors10.8
 Ru's Genes Analysis
 - seeing how Ru's genes compare to our hermit list and my manually curated list
 
-HeatShock
+HeatShock1.0
+- comparing heatshock results for Vih 2017 
+- This is the one where the heatshock bedgraphs didn't actually look like heatshock graphs.
+
+HeatShock2.0
+- comparing heatshock results for Joe's data for Eric
 
 Iter_Plotting
 - comparing with 10, 30, and 50 thousand iterations
