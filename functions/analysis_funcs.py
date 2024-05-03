@@ -49,6 +49,75 @@ def filter_dfs(df_list, col, value, comparison):
         new_df_list.append(df)
     return new_df_list
 
+# ============ BIDIR SPECIFIC STUFF
+# for each gene, get the proper locations
+def get_LIET_end_results(LIET_df):
+    """
+    This function adds additional BID specific related elements to the dataframe: calculates the end positions for both strands.
+    in: pandas Dataframe from the FitParse dataframe class with the sL, tI, and start information
+    out: pandas DataFrame with the following ADDITIONAL columns (one row per bidirectional):
+        * rel_pos_end = sL_mean + tI_mean
+        * rel_pos_end_interval = (sL_mean - sL_stdev)+(tI_mean - tI_stdev),(sL_mean + sL_stdev)+(tI_mean + tI_stdev)
+        * abs_pos_end = start + sL_mean + tI_mean
+        * abs_pos_end_interval = start+[(sL_mean - sL_stdev)+(tI_mean - tI_stdev)],start+[(sL_mean + sL_stdev)+(tI_mean + tI_stdev)]
+        * rel_neg_end = sL_a_mean + tI_a_mean
+        * rel_neg_end_interval = (sL_a_mean - sL_a_stdev)+(tI_a_mean - tI_a_stdev),(sL_a_mean + sL_a_stdev)+(tI_a_mean + tI_a_stdev)
+        * abs_neg_end = mu - sL_a_mean - tI_a_mean
+        * abs_neg_end_interval = start+[(sL_a_mean - sL_a_stdev)+(tI_a_mean - tI_a_stdev)],start+[(sL_a_mean + sL_a_stdev)+(tI_a_mean + tI_a_stdev)]
+    """
+    # get the positive strand transcript info
+    LIET_df = LIET_df.assign(rel_pos_end = LIET_df["sL_mean"]+LIET_df["tI_mean"]) 
+    LIET_df = LIET_df.assign(abs_pos_end = LIET_df["start"]+LIET_df["sL_mean"]+LIET_df["tI_mean"])
+    end_interval_l = LIET_df["sL_mean"]-LIET_df["sL_stdev"]+LIET_df["tI_mean"]-LIET_df["tI_stdev"]
+    end_interval_u = LIET_df["sL_mean"]+LIET_df["sL_stdev"]+LIET_df["tI_mean"]+LIET_df["tI_stdev"]
+    LIET_df = LIET_df.assign(rel_pos_end_interval = end_interval_l.astype(int).astype(str)+","+end_interval_u.astype(int).astype(str))
+    end_interval_l = LIET_df["start"]+LIET_df["sL_mean"]-LIET_df["sL_stdev"]+LIET_df["tI_mean"]-LIET_df["tI_stdev"]
+    end_interval_u = LIET_df["start"]+LIET_df["sL_mean"]+LIET_df["sL_stdev"]+LIET_df["tI_mean"]+LIET_df["tI_stdev"]
+    LIET_df = LIET_df.assign(abs_pos_end_interval = end_interval_l.astype(int).astype(str)+","+end_interval_u.astype(int).astype(str))
+    # negative strand
+    LIET_df = LIET_df.assign(rel_neg_end = LIET_df["sL_a_mean"]+LIET_df["tI_a_mean"]) 
+    LIET_df = LIET_df.assign(abs_neg_end = LIET_df["start"]-LIET_df["sL_a_mean"]-LIET_df["tI_a_mean"])
+    end_interval_l = LIET_df["sL_a_mean"]-LIET_df["sL_a_stdev"]+LIET_df["tI_a_mean"]-LIET_df["tI_a_stdev"]
+    end_interval_u = LIET_df["sL_a_mean"]+LIET_df["sL_a_stdev"]+LIET_df["tI_a_mean"]+LIET_df["tI_a_stdev"]
+    LIET_df = LIET_df.assign(rel_neg_end_interval = end_interval_l.astype(int).astype(str)+","+end_interval_u.astype(int).astype(str))
+    end_interval_l = LIET_df["start"]+LIET_df["sL_a_mean"]-LIET_df["sL_a_stdev"]+LIET_df["tI_a_mean"]-LIET_df["tI_a_stdev"]
+    end_interval_u = LIET_df["start"]+LIET_df["sL_a_mean"]+LIET_df["sL_a_stdev"]+LIET_df["tI_a_mean"]+LIET_df["tI_a_stdev"]
+    LIET_df = LIET_df.assign(abs_neg_end_interval = end_interval_l.astype(int).astype(str)+","+end_interval_u.astype(int).astype(str))
+    return LIET_df
+
+def get_LIET_end_bed(LIET_df):
+    """
+    This function transforms the FitParse dataframe of bidirectionals into a bed file where the start position
+    refers to the 3' most end of the - transcript and end to the 3' most end of the + transcript 
+    (midpoint is NOT mu). Mu is saved as a separate column. The df also contains additional
+    information that might be helpful for downstream analysis or evaluating the trustworthiness of the results.
+    in: pandas Dataframe from the FitParse dataframe class that has undergone the get_LIET_end_results function.
+    out: pandas DataFrame with the following columns (one row per bidirectional):
+        * chr
+        * start = most upstream (3' end of - strand)
+        * end = most downstream (3' end of + strand)
+        * name = name with |- or |+ according to strand
+        * wLI_mean = w_LI_mean,w_aLI_mean
+        * coverage = pos_cov,neg_cov
+        * LI_coverage = coverage attributable to NOT background
+        * rel_end_stdev = rel_pos_end_stdev,rel_neg_end_stdev
+        * mu
+        * elbo_lrange
+    """
+    LI_pos_cov = LIET_df["pos_cov"]*LIET_df["w_LI_mean"]
+    LI_neg_cov = LIET_df["neg_cov"]*LIET_df["w_aLI_mean"]
+    rel_pos_end_stdev = LIET_df["sL_stdev"]+LIET_df["tI_stdev"]
+    rel_neg_end_stdev = LIET_df["sL_a_stdev"]+LIET_df["tI_a_stdev"]
+    bed = pd.DataFrame({"chr": LIET_df.chrom, 
+                           "start": LIET_df.abs_neg_end.astype(int), "end": LIET_df.abs_pos_end.astype(int), 
+                          "name": LIET_df["gene"] + "|+", 
+                          "wLI_mean": LIET_df["w_LI_mean"].astype(str)+","+LIET_df["w_aLI_mean"].astype(str),
+                        "coverage": LIET_df["pos_cov"].astype(str)+","+LIET_df["neg_cov"].astype(str), 
+                        "LI_coverage": LI_pos_cov.astype(int).astype(str)+","+LI_neg_cov.astype(int).astype(str),
+                           "rel_end_stdev": rel_pos_end_stdev.round(1).astype(str)+","+rel_neg_end_stdev.round(1).astype(str), 
+                       "mu":LIET_df.start, "elbow_lrange": LIET_df.elbo_lrange})
+    return bed
+
 # ============ CALCULATING. CORRELATION.
 
 def getcov(df,name='', log=False):
