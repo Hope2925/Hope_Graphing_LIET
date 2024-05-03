@@ -333,7 +333,7 @@ class FitParse:
     results dictionary <fits>.
     '''
 
-    def __init__(self, res_file, log_file=None):
+    def __init__(self, res_file, log_file=None, antisense=True, ET=True, colon_format=False):
 
         self.definitions = OrderedDict({
             "mL": "Sense strand loading position (mu)",
@@ -348,6 +348,8 @@ class FitParse:
             "w_a": "Antisense strand weights [load, background]",
         })
 
+        self.antisense = antisense
+        self.ET = ET
         self.genes = []
         self.annotations = OrderedDict()
         self.fits = OrderedDict()
@@ -408,29 +410,39 @@ class FitParse:
         self.tI, self.tI_std = self.param_extract('tI', stdev=True)
         
         # Recalculate mT values so they are relative to end of annotation
-        absolute_mT, self.mT_std = self.param_extract('mT', stdev=True)
-        relative_mT = []
-        for i, gene in enumerate(self.genes):
-            tss = self.annotations[gene][1]
-            tcs = self.annotations[gene][2]
-            diff = abs(tcs - tss)
-            relative_mT.append(absolute_mT[i] - diff)
-        self.mT = relative_mT
+        if ET is True:
+            absolute_mT, self.mT_std = self.param_extract('mT', stdev=True)
+            relative_mT = []
+            for i, gene in enumerate(self.genes):
+                tss = self.annotations[gene][1]
+                tcs = self.annotations[gene][2]
+                diff = abs(tcs - tss)
+                relative_mT.append(absolute_mT[i] - diff)
+            self.mT = relative_mT
 
-        self.sT, self.sT_std = self.param_extract('sT', stdev=True)
+            self.sT, self.sT_std = self.param_extract('sT', stdev=True)
         self.w, self.w_std = self.param_extract('w', stdev=True)
-        self.mL_a, self.mL_a_std = self.param_extract('mL_a', stdev=True)
-        self.sL_a, self.sL_a_std = self.param_extract('sL_a', stdev=True)
-        self.tI_a, self.tI_a_std = self.param_extract('tI_a', stdev=True)
-        self.w_a, self.w_a_std = self.param_extract('w_a', stdev=True)
+        
+        if antisense is True:
+            self.mL_a, self.mL_a_std = self.param_extract('mL_a', stdev=True)
+            self.sL_a, self.sL_a_std = self.param_extract('sL_a', stdev=True)
+            self.tI_a, self.tI_a_std = self.param_extract('tI_a', stdev=True)
+            self.w_a, self.w_a_std = self.param_extract('w_a', stdev=True)
         
         ## make the unique weighted lists
 #         self.priors_list = ['mL','sL', 'tI', 'mT','sT','w_LI','w_E', 'w_T', 'w_B', 'mL_a','sL_a', 'w_aLI','w_aB']
-        self.w_LI, self.w_E, self.w_T, self.w_B  = self.weight_par_extract(self.w)
-        self.w_LI_std, self.w_E_std, self.w_T_std, self.w_B_std = self.weight_par_extract(self.w_std)
-        self.w_aLI, self.w_aB = self.weight_par_extract(self.w_a)
-        self.w_aLI_std, self.w_aB_std = self.weight_par_extract(self.w_a_std)
-            
+        if ET is True:
+            self.w_LI, self.w_E, self.w_T, self.w_B  = self.weight_par_extract(self.w)
+            self.w_LI_std, self.w_E_std, self.w_T_std, self.w_B_std = self.weight_par_extract(self.w_std)
+        else:
+            self.w_LI, self.w_B  = self.weight_par_extract(self.w)
+            self.w_LI_std, self.w_B_std = self.weight_par_extract(self.w_std)
+        if antisense is True:
+            self.w_aLI, self.w_aB = self.weight_par_extract(self.w_a)
+            self.w_aLI_std, self.w_aB_std = self.weight_par_extract(self.w_a_std)
+#         else:
+#             self.w_aLI, self.w_aE, self.w_aT, self.w_aB  = self.weight_par_extract(self.w_a)
+#             self.w_aLI_std, self.w_aE_std, self.w_aT_std, self.w_aB_std = self.weight_par_extract(self.w_a_std)
         
         
         
@@ -443,7 +455,10 @@ class FitParse:
                         continue
                     elif line[0] == '>':
                         line = line.strip().split(':')
-                        gene_id = line[0][1:]
+                        if colon_format:
+                            gene_id = ":".join([line[0][1:], line[1]])
+                        else:
+                            gene_id = line[0][1:]
                         self.log[gene_id] = dict()
                     else:
                         field, value = line.strip().split(':')
@@ -461,7 +476,7 @@ class FitParse:
             
             self.cov_pos = []
             self.cov_neg = []
-            
+            print(self.genes)
             for g in self.genes:
                 #if (self.log[g]['strand_cov']):
                     self.cov_pos.append(self.log[g]['strand_cov'][0])
@@ -519,7 +534,7 @@ class FitParse:
                            'tI_stdev', 'mT_mean', 'mT_stdev', 'sT_mean','sT_stdev' 
         Sense Weight Priors:'w_LI_mean', 'w_LI_stdev', 'w_E_mean', 'w_E_stdev',
                             'w_T_mean', 'w_T_stdev', 'w_B_mean', 'w_B_stdev' 
-        Antisense Main Priors:'mL_a_mean','mL_a_stdev', 'sL_a_mean', 'sL_a_stdev' 
+        Antisense Main Priors:'mL_a_mean','mL_a_stdev', 'sL_a_mean', 'sL_a_stdev', 'tI_a_mean', 'tI_a_stdev'
         Antisense Weight Priors:'w_aLI_mean', 'w_aLI_stdev','w_aB_mean', 'w_aB_stdev'
         Log Info: 'pos_cov', 'neg_cov', 'total_cov', 'elbo_lrange', 'elbo_urange', 'fit_time_min' 
         '''
@@ -533,26 +548,30 @@ class FitParse:
         self.df['sL_stdev'] = self.sL_std
         self.df['tI_mean'] = self.tI
         self.df['tI_stdev'] = self.tI_std
-        self.df['mT_mean'] = self.mT
-        self.df['mT_stdev'] = self.mT_std
-        self.df['sT_mean'] = self.sT
-        self.df['sT_stdev'] = self.sT_std
+        if self.ET is True:
+            self.df['mT_mean'] = self.mT
+            self.df['mT_stdev'] = self.mT_std
+            self.df['sT_mean'] = self.sT
+            self.df['sT_stdev'] = self.sT_std
+            self.df['w_E_mean'] = self.w_E
+            self.df['w_E_stdev'] = self.w_E_std
+            self.df['w_T_mean'] = self.w_T
+            self.df['w_T_stdev'] = self.w_T_std
         self.df['w_LI_mean'] = self.w_LI
         self.df['w_LI_stdev'] = self.w_LI_std
-        self.df['w_E_mean'] = self.w_E
-        self.df['w_E_stdev'] = self.w_E_std
-        self.df['w_T_mean'] = self.w_T
-        self.df['w_T_stdev'] = self.w_T_std
         self.df['w_B_mean'] = self.w_B
         self.df['w_B_stdev'] = self.w_B_std
-        self.df['mL_a_mean'] = self.mL_a
-        self.df['mL_a_stdev'] = self.mL_a_std
-        self.df['sL_a_mean'] = self.sL_a
-        self.df['sL_a_stdev'] = self.sL_a_std
-        self.df['w_aLI_mean'] = self.w_aLI
-        self.df['w_aLI_stdev'] = self.w_aLI_std
-        self.df['w_aB_mean'] = self.w_aB
-        self.df['w_aB_stdev'] = self.w_aB_std
+        if self.antisense is True:
+            self.df['mL_a_mean'] = self.mL_a
+            self.df['mL_a_stdev'] = self.mL_a_std
+            self.df['sL_a_mean'] = self.sL_a
+            self.df['sL_a_stdev'] = self.sL_a_std
+            self.df['tI_a_mean'] = self.tI_a
+            self.df['tI_a_stdev'] = self.tI_a_std
+            self.df['w_aLI_mean'] = self.w_aLI
+            self.df['w_aLI_stdev'] = self.w_aLI_std
+            self.df['w_aB_mean'] = self.w_aB
+            self.df['w_aB_stdev'] = self.w_aB_std
         # Add the + & - strand coverage, and elbow range
         # initiate lists
         pos_cov_list = []
