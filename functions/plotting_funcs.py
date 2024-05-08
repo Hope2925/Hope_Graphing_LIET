@@ -353,6 +353,7 @@ class FitParse:
         self.genes = []
         self.annotations = OrderedDict()
         self.fits = OrderedDict()
+        self.percentiles = None
         self.priors_list = ['mL','sL', 'tI', 'mT','sT','w_LI','w_E', 'w_T', 'w_B', 'mL_a','sL_a', 'w_aLI','w_aB']
 
         with open(res_file, 'r') as rf:
@@ -392,15 +393,20 @@ class FitParse:
                 for param_val in fit.strip().split(','):
                     # Parameter name and its value
                     p, v = param_val.strip().split('=')
-                    # Mean and standard error of value (from posterior dist)
-                    v_m, v_s = v.split(':')
-                    if p in ['w', 'w_a']:
-                        v_m = [float(i) for i in v_m.strip('[]').split()]
-                        v_s = [float(i) for i in v_s.strip('[]').split()]
+                    # param is Percentiles, need to change data stripping
+                    if p == "Percentiles":
+                        self.percentiles = True
+                        temp["Percentiles"]= v
                     else:
-                        v_m = float(v_m)
-                        v_s = float(v_s)
-                    temp[p] = (v_m, v_s)
+                        # Mean and standard error of value (from posterior dist)
+                        v_m, v_s = v.split(':')
+                        if p in ['w', 'w_a']:
+                            v_m = [float(i) for i in v_m.strip('[]').split()]
+                            v_s = [float(i) for i in v_s.strip('[]').split()]
+                        else:
+                            v_m = float(v_m)
+                            v_s = float(v_s)
+                        temp[p] = (v_m, v_s)
                 
                 self.fits[gid] = temp
 
@@ -504,7 +510,30 @@ class FitParse:
             return param_vals, param_stdev
         else:
             return param_vals
-        
+    
+    def percentile_extract(self):
+        """
+        Extract the percentiles (ordered baased on genes list) from fits
+        dictionary and output as a dictionary with the different percentiles as keys
+        and the lists as the lists in gene order.
+        """
+        percentile_dict = dict()
+        # save each percentile as per_pos and per_neg
+        first = True
+        for g in self.genes:
+            if first:
+                for perc in self.fits[g]["Percentiles"].split(";"):
+                    p_new, pos_res, neg_res = perc.split("-")
+                    percentile_dict["_".join([p_new, "perc_pos"])] = [pos_res]
+                    percentile_dict["_".join([p_new, "perc_neg"])] = [neg_res]
+                    first = False
+            else:
+                for perc in self.fits[g]["Percentiles"].split(";"):
+                    p_new, pos_res, neg_res = perc.split("-")
+                    percentile_dict["_".join([p_new, "perc_pos"])] = percentile_dict["_".join([p_new, "perc_pos"])] + [pos_res]
+                    percentile_dict["_".join([p_new, "perc_neg"])] = percentile_dict["_".join([p_new, "perc_neg"])] + [neg_res]
+        return percentile_dict
+            
     def weight_par_extract(self, par_list):
         '''This function will take the par list and separate it, returning new lists of each of the indexes'''
         list1 = []
@@ -572,6 +601,12 @@ class FitParse:
             self.df['w_aLI_stdev'] = self.w_aLI_std
             self.df['w_aB_mean'] = self.w_aB
             self.df['w_aB_stdev'] = self.w_aB_std
+        # get the percentiles if they exist
+        if self.percentiles:
+            percentile_dict = self.percentile_extract()
+            # save each percentile as per_pos and per_neg
+            for perc, perc_list in percentile_dict.items():
+                self.df[perc] = perc_list
         # Add the + & - strand coverage, and elbow range
         # initiate lists
         pos_cov_list = []
