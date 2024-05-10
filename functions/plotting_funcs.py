@@ -482,7 +482,7 @@ class FitParse:
             
             self.cov_pos = []
             self.cov_neg = []
-            print(self.genes)
+            print("Number of features considered:", len(self.genes))
             for g in self.genes:
                 #if (self.log[g]['strand_cov']):
                     self.cov_pos.append(self.log[g]['strand_cov'][0])
@@ -523,15 +523,15 @@ class FitParse:
         for g in self.genes:
             if first:
                 for perc in self.fits[g]["Percentiles"].split(";"):
-                    p_new, pos_res, neg_res = perc.split("-")
-                    percentile_dict["_".join([p_new, "perc_pos"])] = [pos_res]
-                    percentile_dict["_".join([p_new, "perc_neg"])] = [neg_res]
+                    p_new, pos_res, neg_res = perc.split(":")
+                    percentile_dict["_".join([p_new, "perc_pos"])] = [int(pos_res)]
+                    percentile_dict["_".join([p_new, "perc_neg"])] = [int(neg_res)]
                     first = False
             else:
                 for perc in self.fits[g]["Percentiles"].split(";"):
-                    p_new, pos_res, neg_res = perc.split("-")
-                    percentile_dict["_".join([p_new, "perc_pos"])] = percentile_dict["_".join([p_new, "perc_pos"])] + [pos_res]
-                    percentile_dict["_".join([p_new, "perc_neg"])] = percentile_dict["_".join([p_new, "perc_neg"])] + [neg_res]
+                    p_new, pos_res, neg_res = perc.split(":")
+                    percentile_dict["_".join([p_new, "perc_pos"])] = percentile_dict["_".join([p_new, "perc_pos"])] + [int(pos_res)]
+                    percentile_dict["_".join([p_new, "perc_neg"])] = percentile_dict["_".join([p_new, "perc_neg"])] + [int(neg_res)]
         return percentile_dict
             
     def weight_par_extract(self, par_list):
